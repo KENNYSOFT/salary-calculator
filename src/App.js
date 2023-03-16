@@ -20,7 +20,7 @@ function Table({ columns, data }) {
 
   // Render the UI for your table
   return (
-    <MaUTable {...getTableProps()}>
+    <MaUTable {...getTableProps()} stickyHeader size="small">
       <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow {...headerGroup.getHeaderGroupProps()}>
@@ -56,44 +56,53 @@ function App() {
   const columns = React.useMemo(
     () => [
       {
-        Header: "Name",
+        Header: "월급여액(천원)\n[비과세 및 학자금 제외]",
         columns: [
           {
-            Header: "First Name",
-            accessor: "firstName",
+            Header: "이상",
+            accessor: "minInclusive",
+            Cell: ({ value }) => value.toLocaleString(),
           },
           {
-            Header: "Last Name",
-            accessor: "lastName",
+            Header: "미만",
+            accessor: "maxExclusive",
+            Cell: ({ value }) => value.toLocaleString(),
           },
         ],
       },
       {
-        Header: "Info",
+        Header: "계산 과정 (1인 기준)",
         columns: [
           {
-            Header: "Age",
-            accessor: "age",
+            Header: "총급여액",
+            accessor: "total",
           },
           {
-            Header: "Visits",
-            accessor: "visits",
+            Header: "과세표준",
+            accessor: "taxBase",
           },
           {
-            Header: "Status",
-            accessor: "status",
+            Header: "산출세액",
+            accessor: "calculatedTax",
           },
           {
-            Header: "Profile Progress",
-            accessor: "progress",
+            Header: "결정세액",
+            accessor: "determinatedTax",
           },
         ],
+      },
+      {
+        Header: "공제대상가족의 수",
+        columns: new Array(11).fill(undefined).map((_, i) => ({
+          Header: `${i + 1}`,
+          accessor: `${i + 1}`,
+        })),
       },
     ],
     []
   );
 
-  const data = React.useMemo(() => makeData(20), []);
+  const data = React.useMemo(makeData, []);
 
   return (
     <div>

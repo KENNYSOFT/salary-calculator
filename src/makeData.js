@@ -95,8 +95,6 @@ const floor = (num, precision) => {
   return Math.floor(num * factor) / factor;
 };
 
-const formatAmount = (amount) => `₩${amount.toLocaleString()}`;
-
 const calculate = (monthly, family) => {
   const total = monthly * 12;
   const taxBase =
@@ -110,11 +108,7 @@ const calculate = (monthly, family) => {
     floor(Math.min(floor(monthly, -3), 4_490_000) * 0.045, -1) * 12;
   if (taxBase <= 0) {
     return {
-      total: formatAmount(total),
-      taxBase: "-",
-      calculatedTax: "-",
-      determinatedTax: "-",
-      monthlyWithholdingText: "-",
+      total,
     };
   }
   const calculatedTax = calculateProgressive(종합소득세율, taxBase);
@@ -125,14 +119,12 @@ const calculate = (monthly, family) => {
       findAppliedRange(근로소득세액공제_한도, total)(total)
     );
   return {
-    total: formatAmount(total),
-    taxBase: formatAmount(taxBase),
-    calculatedTax: formatAmount(Math.round(calculatedTax)),
-    determinatedTax: formatAmount(Math.round(determinatedTax)),
+    total,
+    taxBase,
+    calculatedTax: Math.round(calculatedTax),
+    determinatedTax: Math.round(determinatedTax),
     monthlyWithholdingText:
-      determinatedTax < 12_000
-        ? "-"
-        : formatAmount(floor(determinatedTax / 12, -1)),
+      determinatedTax < 12_000 ? 0 : floor(determinatedTax / 12, -1),
   };
 };
 

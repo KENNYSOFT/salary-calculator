@@ -53,6 +53,10 @@ function Table({ columns, data }) {
 }
 
 function App() {
+  const formatLocale = ({ value }) => value.toLocaleString();
+  const formatAmount = ({ value }) =>
+    value ? `₩${value.toLocaleString()}` : "-";
+
   const columns = React.useMemo(
     () => [
       {
@@ -61,12 +65,12 @@ function App() {
           {
             Header: "이상",
             accessor: "minInclusive",
-            Cell: ({ value }) => value.toLocaleString(),
+            Cell: formatLocale,
           },
           {
             Header: "미만",
             accessor: "maxExclusive",
-            Cell: ({ value }) => value.toLocaleString(),
+            Cell: formatLocale,
           },
         ],
       },
@@ -76,18 +80,22 @@ function App() {
           {
             Header: "총급여액",
             accessor: "total",
+            Cell: formatAmount,
           },
           {
             Header: "과세표준",
             accessor: "taxBase",
+            Cell: formatAmount,
           },
           {
             Header: "산출세액",
             accessor: "calculatedTax",
+            Cell: formatAmount,
           },
           {
             Header: "결정세액",
             accessor: "determinatedTax",
+            Cell: formatAmount,
           },
         ],
       },
@@ -96,6 +104,7 @@ function App() {
         columns: new Array(11).fill(undefined).map((_, i) => ({
           Header: `${i + 1}`,
           accessor: `${i + 1}`,
+          Cell: formatAmount,
         })),
       },
     ],

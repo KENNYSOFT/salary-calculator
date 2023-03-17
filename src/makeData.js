@@ -124,7 +124,7 @@ const calculate = (monthly, family) => {
     calculatedTax: Math.round(calculatedTax),
     determinatedTax: Math.round(determinatedTax),
     monthlyWithholdingText:
-      determinatedTax < 12_000 ? 0 : floor(determinatedTax / 12, -1),
+      determinatedTax < 12_000 ? undefined : floor(determinatedTax / 12, -1),
   };
 };
 

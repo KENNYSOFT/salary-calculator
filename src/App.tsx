@@ -7,11 +7,17 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 
-import { useTable } from "react-table";
+import { Column, useTable } from "react-table";
 
-import makeData from "./makeData";
+import makeData, { RowType } from "./makeData";
 
-function Table({ columns, data }) {
+function Table({
+  columns,
+  data,
+}: {
+  columns: Column<RowType>[];
+  data: RowType[];
+}) {
   // Use the state and functions returned from useTable to build your UI
   const { getTableProps, headerGroups, rows, prepareRow } = useTable({
     columns,
@@ -53,8 +59,8 @@ function Table({ columns, data }) {
 }
 
 function App() {
-  const formatLocale = ({ value }) => value.toLocaleString();
-  const formatAmount = ({ value }) =>
+  const formatLocale = ({ value }: { value: number }) => value.toLocaleString();
+  const formatAmount = ({ value }: { value: number }) =>
     value ? `₩${value.toLocaleString()}` : "-";
 
   const columns = React.useMemo(

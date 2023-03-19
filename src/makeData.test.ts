@@ -1,21 +1,25 @@
 import { readFile, utils } from "xlsx";
-import makeData, { articles } from "./makeData";
+import makeData, { articles, Date, Progressive } from "./makeData";
 
 describe("누진제", () => {
-  const testProgressiveCompensation = (ranges) => {
+  const testProgressiveCompensation = (ranges: Progressive) => {
     const rangeEntries = Object.entries(ranges);
     for (let i = 1; i < rangeEntries.length; i++) {
+      const amount = parseInt(rangeEntries[i][0]) - 1;
       expect(
-        ((rangeEntries[i][0] - 1) * rangeEntries[i][1].percent) / 100 +
+        (amount * rangeEntries[i][1].percent) / 100 +
           rangeEntries[i][1].compensation
       ).toBe(
-        ((rangeEntries[i][0] - 1) * rangeEntries[i - 1][1].percent) / 100 +
+        (amount * rangeEntries[i - 1][1].percent) / 100 +
           rangeEntries[i - 1][1].compensation
       );
     }
   };
 
-  const iterateRevisions = (articleName, article) => {
+  const iterateRevisions = (
+    articleName: string,
+    article: Record<Date, Progressive>
+  ) => {
     Object.entries(article).forEach(([revision, ranges]) => {
       it(`${articleName} ${revision}`, () => {
         testProgressiveCompensation(ranges);
@@ -29,14 +33,17 @@ describe("누진제", () => {
 });
 
 describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결과 일치", () => {
-  const compareCalculationFromNtsFile = (revision, headerRowCount) => {
+  const compareCalculationFromNtsFile = (
+    revision: Date,
+    headerRowCount: number
+  ) => {
     const workbook = readFile(
       `./withholding-income-tax-table/${revision}-근로소득_간이세액표(조견표).xls${
         revision === "2023-02-28" ? "x" : ""
       }`
     );
     const expected = utils
-      .sheet_to_json(
+      .sheet_to_json<(number | string)[]>(
         workbook.Sheets[
           revision === "2014-02-21"
             ? "2014.2월 간이세액표"
@@ -68,7 +75,7 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
     }
   };
 
-  const doTest = (revision, headerRowCount) => {
+  const doTest = (revision: Date, headerRowCount: number) => {
     it(revision, () => {
       compareCalculationFromNtsFile(revision, headerRowCount);
     });

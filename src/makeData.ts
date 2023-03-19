@@ -1,4 +1,29 @@
-const 근로소득간이세액표_기준일자 = {
+export type Date = string;
+export type Progressive = Record<
+  number,
+  { percent: number; compensation: number }
+>;
+type RangedFunction = Record<number, (_: number) => number>;
+type Articles = {
+  근로소득공제율: Record<Date, Progressive>;
+  특별소득공제_및_특별세액공제_중_일부: Record<
+    Date,
+    Record<number, RangedFunction>
+  >;
+  국민연금_기준소득월액_상한액: Record<Date, number>;
+  종합소득세율: Record<Date, Progressive>;
+  근로소득세액공제율: Record<Date, Progressive>;
+  근로소득세액공제_한도: Record<Date, RangedFunction>;
+};
+export type RowType = {
+  minInclusive: number;
+  maxExclusive: number;
+} & ReturnType<typeof calculate>;
+
+const 근로소득간이세액표_기준일자: Record<
+  Date,
+  Record<keyof Articles, Date>
+> = {
   "2014-02-21": {
     근로소득공제율: "2014-01-01",
     특별소득공제_및_특별세액공제_중_일부: "2014-02-21",
@@ -57,7 +82,7 @@ const 근로소득간이세액표_기준일자 = {
   },
 };
 
-const 근로소득공제율 = {
+const 근로소득공제율: Record<Date, Progressive> = {
   // 구 소득세법(2019. 12. 31. 법률 제16834호로 개정되기 전의 것) 제47조 제1항.
   "2014-01-01": {
     0: { percent: 70, compensation: 0 },
@@ -77,7 +102,10 @@ const 근로소득공제율 = {
   },
 };
 
-const 특별소득공제_및_특별세액공제_중_일부 = {
+const 특별소득공제_및_특별세액공제_중_일부: Record<
+  Date,
+  Record<number, RangedFunction>
+> = {
   // 구 소득세법 시행령(2015. 6. 30. 대통령령 제26344호로 개정되기 전의 것) 제189조 제1항.
   "2014-02-21": {
     1: {
@@ -133,7 +161,7 @@ const 특별소득공제_및_특별세액공제_중_일부 = {
   },
 };
 
-const 국민연금_기준소득월액_상한액 = {
+const 국민연금_기준소득월액_상한액: Record<Date, number> = {
   // 구 국민연금 기준소득월액 하한액과 상한액(2014. 3. 28. 보건복지부고시 제2014-47호로 개정되기 전의 것) 제1호 (가)목.
   "2013-03-26": 3_980_000,
   // 구 국민연금 기준소득월액 하한액과 상한액(2015. 3. 27. 보건복지부고시 제2015-56호로 개정되기 전의 것) 제1호 (가)목.
@@ -156,7 +184,7 @@ const 국민연금_기준소득월액_상한액 = {
   "2022-03-31": 5_530_000,
 };
 
-const 종합소득세율 = {
+const 종합소득세율: Record<Date, Progressive> = {
   // 구 소득세법(2016. 12. 20. 법률 제14389호로 개정되기 전의 것) 제55조 제1항.
   "2014-01-01": {
     0: { percent: 6, compensation: 0 },
@@ -208,7 +236,7 @@ const 종합소득세율 = {
   },
 };
 
-const 근로소득세액공제율 = {
+const 근로소득세액공제율: Record<Date, Progressive> = {
   // 구 소득세법(2015. 5. 13. 법률 제13282호로 개정되기 전의 것) 제59조 제1항.
   "2014-01-01": {
     0: { percent: 55, compensation: 0 },
@@ -221,7 +249,7 @@ const 근로소득세액공제율 = {
   },
 };
 
-const 근로소득세액공제_한도 = {
+const 근로소득세액공제_한도: Record<Date, RangedFunction> = {
   // 구 소득세법(2015. 5. 13. 법률 제13282호로 개정되기 전의 것) 제59조 제2항.
   "2014-01-01": {
     0: (_) => 660_000,
@@ -250,7 +278,7 @@ const 근로소득세액공제_한도 = {
   },
 };
 
-export const articles = {
+export const articles: Articles = {
   근로소득공제율,
   특별소득공제_및_특별세액공제_중_일부,
   국민연금_기준소득월액_상한액,
@@ -259,24 +287,50 @@ export const articles = {
   근로소득세액공제_한도,
 };
 
-const findAppliedRange = (obj, value) => {
-  const keys = Object.keys(obj);
+const 근로소득간이세액표_기준: Record<
+  Date,
+  {
+    근로소득공제율: Progressive;
+    특별소득공제_및_특별세액공제_중_일부: Record<number, RangedFunction>;
+    국민연금_기준소득월액_상한액: number;
+    종합소득세율: Progressive;
+    근로소득세액공제율: Progressive;
+    근로소득세액공제_한도: RangedFunction;
+  }
+> = Object.fromEntries(
+  Object.entries(근로소득간이세액표_기준일자).map(([date, dates]) => [
+    date,
+    {
+      근로소득공제율: 근로소득공제율[dates.근로소득공제율],
+      특별소득공제_및_특별세액공제_중_일부:
+        특별소득공제_및_특별세액공제_중_일부[
+          dates.특별소득공제_및_특별세액공제_중_일부
+        ],
+      국민연금_기준소득월액_상한액:
+        국민연금_기준소득월액_상한액[dates.국민연금_기준소득월액_상한액],
+      종합소득세율: 종합소득세율[dates.종합소득세율],
+      근로소득세액공제율: 근로소득세액공제율[dates.근로소득세액공제율],
+      근로소득세액공제_한도: 근로소득세액공제_한도[dates.근로소득세액공제_한도],
+    },
+  ])
+);
+
+const findAppliedRange = <T>(obj: Record<number, T>, value: number) => {
+  const keys = Object.keys(obj).map((k) => parseInt(k));
   return obj[
     keys.find(
       (k, i) =>
         value >= keys[i] && (i === keys.length - 1 || value < keys[i + 1])
-    )
+    ) || 0
   ];
 };
 
-const calculateProgressive = (obj, value) => {
-  return (
-    (value * findAppliedRange(obj, value).percent) / 100 +
-    findAppliedRange(obj, value).compensation
-  );
+const calculateProgressive = (obj: Progressive, value: number) => {
+  const range = findAppliedRange(obj, value);
+  return (value * range.percent) / 100 + range.compensation;
 };
 
-const range = (len) => {
+const range = (len: number) => {
   const arr = [];
   for (let i = 0; i < len; i++) {
     arr.push(i);
@@ -284,34 +338,31 @@ const range = (len) => {
   return arr;
 };
 
-const floor = (num, precision) => {
+const floor = (num: number, precision: number) => {
   const factor = Math.pow(10, precision);
   return Math.floor(num * factor) / factor;
 };
 
-const calculate = (revision, monthly, family) => {
-  const appliedArticles = Object.fromEntries(
-    Object.entries(근로소득간이세액표_기준일자[revision]).map(
-      ([key, date]) => [key, articles[key][date]]
-    )
-  );
+const calculate = (revision: string, monthly: number, family: number) => {
+  const {
+    근로소득공제율,
+    특별소득공제_및_특별세액공제_중_일부,
+    국민연금_기준소득월액_상한액,
+    종합소득세율,
+    근로소득세액공제율,
+    근로소득세액공제_한도,
+  } = 근로소득간이세액표_기준[revision];
   const total = monthly * 12;
   const taxBase =
     total -
-    calculateProgressive(appliedArticles.근로소득공제율, total) -
+    calculateProgressive(근로소득공제율, total) -
     family * 1_500_000 -
     findAppliedRange(
-      findAppliedRange(
-        appliedArticles.특별소득공제_및_특별세액공제_중_일부,
-        family
-      ),
+      findAppliedRange(특별소득공제_및_특별세액공제_중_일부, family),
       total
     )(total) -
     floor(
-      Math.min(
-        floor(monthly, -3),
-        appliedArticles.국민연금_기준소득월액_상한액
-      ) * 0.045,
+      Math.min(floor(monthly, -3), 국민연금_기준소득월액_상한액) * 0.045,
       -1
     ) *
       12;
@@ -320,18 +371,12 @@ const calculate = (revision, monthly, family) => {
       total,
     };
   }
-  const calculatedTax = calculateProgressive(
-    appliedArticles.종합소득세율,
-    taxBase
-  );
+  const calculatedTax = calculateProgressive(종합소득세율, taxBase);
   const determinatedTax =
     calculatedTax -
     Math.min(
-      calculateProgressive(
-        appliedArticles.근로소득세액공제율,
-        calculatedTax
-      ),
-      findAppliedRange(appliedArticles.근로소득세액공제_한도, total)(total)
+      calculateProgressive(근로소득세액공제율, calculatedTax),
+      findAppliedRange(근로소득세액공제_한도, total)(total)
     );
   return {
     total,
@@ -343,7 +388,11 @@ const calculate = (revision, monthly, family) => {
   };
 };
 
-const newRow = (revision, minInclusive, interval) => {
+const newRow = (
+  revision: string,
+  minInclusive: number,
+  interval: number
+): RowType => {
   const maxExclusive = minInclusive + interval;
   const monthly = ((minInclusive + maxExclusive) / 2) * 1_000;
   return {
@@ -359,7 +408,7 @@ const newRow = (revision, minInclusive, interval) => {
   };
 };
 
-export default function makeData(revision) {
+export default function makeData(revision: string) {
   return [
     ...range(146)
       .map((i) => 770 + i * 5)

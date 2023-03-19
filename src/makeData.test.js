@@ -36,7 +36,14 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
       }`
     );
     const expected = utils
-      .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 })
+      .sheet_to_json(
+        workbook.Sheets[
+          revision === "2014-02-21"
+            ? "2014.2월 간이세액표"
+            : workbook.SheetNames[0]
+        ],
+        { header: 1 }
+      )
       .slice(headerRowCount)
       .map((r) => {
         const [minInclusive, maxExclusive] = r;
@@ -67,6 +74,7 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
     });
   };
 
+  doTest("2014-02-21", 5);
   doTest("2015-06-30", 3);
   doTest("2017-02-03", 3);
   doTest("2018-02-13", 5);

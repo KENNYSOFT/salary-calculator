@@ -111,7 +111,7 @@ function App() {
     []
   );
 
-  const data = React.useMemo(makeData, []);
+  const data = React.useMemo(() => makeData("2023-02-28"), []);
 
   return (
     <div>

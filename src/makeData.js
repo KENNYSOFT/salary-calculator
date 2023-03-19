@@ -1,5 +1,5 @@
 // 구 소득세법(2015. 12. 15. 법률 제13558호로 개정되기 전의 것) 제47조 제1항.
-const 근로소득공제율 = {
+export const 근로소득공제율 = {
   0: { ratio: 0.7, compensation: 0 },
   5_000_001: { ratio: 0.4, compensation: 1_500_000 },
   15_000_001: { ratio: 0.15, compensation: 5_250_000 },
@@ -39,7 +39,7 @@ const 특별소득공제_및_특별세액공제_중_일부 = {
 };
 
 // 소득세법 제55조 제1항.
-const 종합소득세율 = {
+export const 종합소득세율 = {
   0: { ratio: 0.06, compensation: 0 },
   14_000_001: { ratio: 0.15, compensation: -1_260_000 },
   50_000_001: { ratio: 0.24, compensation: -5_760_000 },
@@ -51,7 +51,7 @@ const 종합소득세율 = {
 };
 
 // 구 소득세법(2015. 5. 13. 법률 제13282호로 개정되기 전의 것) 제59조 제1항.
-const 근로소득세액공제율 = {
+export const 근로소득세액공제율 = {
   0: { ratio: 0.55, compensation: 0 },
   500_001: { ratio: 0.3, compensation: 125_000 },
 };

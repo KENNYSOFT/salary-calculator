@@ -5,15 +5,12 @@ export type Progressive = Record<
 >;
 type RangedFunction = Record<number, (_: number) => number>;
 type Articles = {
-  근로소득공제율: Record<Date, Progressive>;
-  특별소득공제_및_특별세액공제_중_일부: Record<
-    Date,
-    Record<number, RangedFunction>
-  >;
-  국민연금_기준소득월액_상한액: Record<Date, number>;
-  종합소득세율: Record<Date, Progressive>;
-  근로소득세액공제율: Record<Date, Progressive>;
-  근로소득세액공제_한도: Record<Date, RangedFunction>;
+  근로소득공제율: Progressive;
+  특별소득공제_및_특별세액공제_중_일부: Record<number, RangedFunction>;
+  국민연금_기준소득월액_상한액: number;
+  종합소득세율: Progressive;
+  근로소득세액공제율: Progressive;
+  근로소득세액공제_한도: RangedFunction;
 };
 export type RowType = {
   minInclusive: number;
@@ -278,7 +275,9 @@ const 근로소득세액공제_한도: Record<Date, RangedFunction> = {
   },
 };
 
-export const articles: Articles = {
+export const articlesWithRevisions: {
+  [Key in keyof Articles]: Record<Date, Articles[Key]>;
+} = {
   근로소득공제율,
   특별소득공제_및_특별세액공제_중_일부,
   국민연금_기준소득월액_상한액,
@@ -287,17 +286,7 @@ export const articles: Articles = {
   근로소득세액공제_한도,
 };
 
-const 근로소득간이세액표_기준: Record<
-  Date,
-  {
-    근로소득공제율: Progressive;
-    특별소득공제_및_특별세액공제_중_일부: Record<number, RangedFunction>;
-    국민연금_기준소득월액_상한액: number;
-    종합소득세율: Progressive;
-    근로소득세액공제율: Progressive;
-    근로소득세액공제_한도: RangedFunction;
-  }
-> = Object.fromEntries(
+const 근로소득간이세액표_기준: Record<Date, Articles> = Object.fromEntries(
   Object.entries(근로소득간이세액표_기준일자).map(([date, dates]) => [
     date,
     {

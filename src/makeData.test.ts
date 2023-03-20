@@ -1,5 +1,5 @@
 import { readFile, utils } from "xlsx";
-import makeData, { articles, Date, Progressive } from "./makeData";
+import makeData, { articlesWithRevisions, Date, Progressive } from "./makeData";
 
 describe("누진제", () => {
   const testProgressiveCompensation = (ranges: Progressive) => {
@@ -27,9 +27,9 @@ describe("누진제", () => {
     });
   };
 
-  iterateRevisions("근로소득공제율", articles.근로소득공제율);
-  iterateRevisions("종합소득세율", articles.종합소득세율);
-  iterateRevisions("근로소득세액공제율", articles.근로소득세액공제율);
+  iterateRevisions("근로소득공제율", articlesWithRevisions.근로소득공제율);
+  iterateRevisions("종합소득세율", articlesWithRevisions.종합소득세율);
+  iterateRevisions("근로소득세액공제율", articlesWithRevisions.근로소득세액공제율);
 });
 
 describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결과 일치", () => {

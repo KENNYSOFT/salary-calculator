@@ -12,10 +12,14 @@ type Articles = {
   근로소득세액공제율: Progressive;
   근로소득세액공제_한도: RangedFunction;
 };
+export const dependentFamilyRange = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+] as const;
 export type RowType = {
   minInclusive: number;
   maxExclusive: number;
-} & ReturnType<typeof calculate>;
+} & ReturnType<typeof calculate> &
+  Record<(typeof dependentFamilyRange)[number], number>;
 
 const 근로소득간이세액표_기준일자: Record<
   Date,
@@ -310,7 +314,7 @@ const findAppliedRange = <T>(obj: Record<number, T>, value: number) => {
     keys.find(
       (k, i) =>
         value >= keys[i] && (i === keys.length - 1 || value < keys[i + 1])
-    ) || 0
+    ) ?? 0
   ];
 };
 
@@ -372,7 +376,7 @@ const calculate = (revision: string, monthly: number, family: number) => {
     taxBase,
     calculatedTax: Math.round(calculatedTax),
     determinatedTax: Math.round(determinatedTax),
-    monthlyWithholdingText:
+    monthlyWithholdingTax:
       determinatedTax < 12_000 ? undefined : floor(determinatedTax / 12, -1),
   };
 };
@@ -388,12 +392,12 @@ const newRow = (
     minInclusive,
     maxExclusive,
     ...calculate(revision, monthly, 1),
-    ...Object.fromEntries(
-      range(11).map((i) => [
-        i + 1,
-        calculate(revision, monthly, i + 1).monthlyWithholdingText,
+    ...(Object.fromEntries(
+      dependentFamilyRange.map((i) => [
+        i,
+        calculate(revision, monthly, i).monthlyWithholdingTax,
       ])
-    ),
+    ) as { [Key in (typeof dependentFamilyRange)[number]]: number }),
   };
 };
 

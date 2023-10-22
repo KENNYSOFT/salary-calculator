@@ -4,6 +4,7 @@ import makeData, {
   ArticleTypes,
   근로소득간이세액표_개정일자,
 } from "./makeData";
+import { ObjectEntries, ObjectFromEntries } from "./util";
 
 describe("누진제", () => {
   test.each(
@@ -13,14 +14,14 @@ describe("누진제", () => {
         "근로소득공제율" | "종합소득세율" | "근로소득세액공제율"
       >[]
     ).flatMap((articleName) =>
-      Object.entries(articlesWithRevisions[articleName]).map(
+      ObjectEntries(articlesWithRevisions[articleName]).map(
         ([revision, ranges]) => ({ articleName, revision, ranges })
       )
     )
   )("$articleName $revision", ({ ranges }) => {
-    const rangeEntries = Object.entries(ranges);
+    const rangeEntries = ObjectEntries(ranges);
     for (let i = 1; i < rangeEntries.length; i++) {
-      const amount = parseInt(rangeEntries[i][0]) - 1;
+      const amount = rangeEntries[i][0] - 1;
       expect(
         (amount * rangeEntries[i][1].percent) / 100 +
           rangeEntries[i][1].compensation
@@ -71,7 +72,7 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
           return {
             minInclusive: minInclusive === "10,000천원" ? 10000 : minInclusive,
             maxExclusive: maxExclusive === undefined ? 10000 : maxExclusive,
-            ...Object.fromEntries(
+            ...ObjectFromEntries(
               r
                 .slice(2, 13)
                 .map((amount, i) => [

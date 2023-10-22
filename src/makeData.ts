@@ -1,7 +1,6 @@
-type Progressive = Record<
-  number,
-  { percent: number; compensation: number }
->;
+import { ObjectEntries, ObjectFromEntries } from "./util";
+
+type Progressive = Record<number, { percent: number; compensation: number }>;
 type RangedFunction = Record<number, (_: number) => number>;
 
 export const ArticleTypes = [
@@ -338,8 +337,8 @@ export const articlesWithRevisions: {
 };
 
 const 근로소득간이세액표_기준: Record<근로소득간이세액표_개정일자, Articles> =
-  Object.fromEntries(
-    Object.entries(근로소득간이세액표_기준일자).map(([revision, dates]) => [
+  ObjectFromEntries(
+    ObjectEntries(근로소득간이세액표_기준일자).map(([revision, dates]) => [
       revision,
       {
         근로소득공제율: 근로소득공제율[dates.근로소득공제율],
@@ -355,7 +354,7 @@ const 근로소득간이세액표_기준: Record<근로소득간이세액표_개
           근로소득세액공제_한도[dates.근로소득세액공제_한도],
       },
     ])
-  ) as { [K in 근로소득간이세액표_개정일자]: Articles };
+  );
 
 const findAppliedRange = <T>(obj: Record<number, T>, value: number) => {
   const keys = Object.keys(obj).map((k) => parseInt(k));
@@ -445,12 +444,12 @@ const newRow = (
     minInclusive,
     maxExclusive,
     ...calculate(revision, monthly, 1),
-    ...(Object.fromEntries(
+    ...ObjectFromEntries(
       dependentFamilyRange.map((i) => [
         i,
         calculate(revision, monthly, i).monthlyWithholdingTax,
       ])
-    ) as { [K in (typeof dependentFamilyRange)[number]]: number }),
+    ),
   };
 };
 

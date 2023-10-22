@@ -1,9 +1,17 @@
-export type Date = string;
-export type Progressive = Record<
+type Progressive = Record<
   number,
   { percent: number; compensation: number }
 >;
 type RangedFunction = Record<number, (_: number) => number>;
+
+export const ArticleTypes = [
+  "근로소득공제율",
+  "특별소득공제_및_특별세액공제_중_일부",
+  "국민연금_기준소득월액_상한액",
+  "종합소득세율",
+  "근로소득세액공제율",
+  "근로소득세액공제_한도",
+] as const;
 type Articles = {
   근로소득공제율: Progressive;
   특별소득공제_및_특별세액공제_중_일부: Record<number, RangedFunction>;
@@ -12,6 +20,7 @@ type Articles = {
   근로소득세액공제율: Progressive;
   근로소득세액공제_한도: RangedFunction;
 };
+
 export const dependentFamilyRange = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 ] as const;
@@ -19,11 +28,42 @@ export type RowType = {
   minInclusive: number;
   maxExclusive: number;
 } & ReturnType<typeof calculate> &
-  Record<(typeof dependentFamilyRange)[number], number>;
+  Record<(typeof dependentFamilyRange)[number], number | undefined>;
 
+export type 근로소득간이세액표_개정일자 =
+  | "2014-02-21"
+  | "2015-06-30"
+  | "2017-02-03"
+  | "2018-02-13"
+  | "2020-02-11"
+  | "2021-02-17"
+  | "2023-02-28";
+type 개정일자 = {
+  근로소득공제율: "2014-01-01" | "2019-12-31";
+  특별소득공제_및_특별세액공제_중_일부: "2014-02-21" | "2015-06-30";
+  국민연금_기준소득월액_상한액:
+    | "2013-03-26"
+    | "2014-03-28"
+    | "2015-03-27"
+    | "2016-03-23"
+    | "2017-03-27"
+    | "2018-03-27"
+    | "2019-03-29"
+    | "2020-03-31"
+    | "2021-03-31"
+    | "2022-03-31";
+  종합소득세율:
+    | "2014-01-01"
+    | "2016-12-20"
+    | "2017-12-19"
+    | "2020-12-29"
+    | "2022-12-31";
+  근로소득세액공제율: "2014-01-01" | "2015-05-13";
+  근로소득세액공제_한도: "2014-01-01" | "2015-05-13" | "2022-12-31";
+};
 const 근로소득간이세액표_기준일자: Record<
-  Date,
-  Record<keyof Articles, Date>
+  근로소득간이세액표_개정일자,
+  { [K in (typeof ArticleTypes)[number]]: 개정일자[K] }
 > = {
   "2014-02-21": {
     근로소득공제율: "2014-01-01",
@@ -83,7 +123,7 @@ const 근로소득간이세액표_기준일자: Record<
   },
 };
 
-const 근로소득공제율: Record<Date, Progressive> = {
+const 근로소득공제율: Record<개정일자["근로소득공제율"], Progressive> = {
   // 구 소득세법(2019. 12. 31. 법률 제16834호로 개정되기 전의 것) 제47조 제1항.
   "2014-01-01": {
     0: { percent: 70, compensation: 0 },
@@ -104,7 +144,7 @@ const 근로소득공제율: Record<Date, Progressive> = {
 };
 
 const 특별소득공제_및_특별세액공제_중_일부: Record<
-  Date,
+  개정일자["특별소득공제_및_특별세액공제_중_일부"],
   Record<number, RangedFunction>
 > = {
   // 구 소득세법 시행령(2015. 6. 30. 대통령령 제26344호로 개정되기 전의 것) 제189조 제1항.
@@ -162,7 +202,10 @@ const 특별소득공제_및_특별세액공제_중_일부: Record<
   },
 };
 
-const 국민연금_기준소득월액_상한액: Record<Date, number> = {
+const 국민연금_기준소득월액_상한액: Record<
+  개정일자["국민연금_기준소득월액_상한액"],
+  number
+> = {
   // 구 국민연금 기준소득월액 하한액과 상한액(2014. 3. 28. 보건복지부고시 제2014-47호로 개정되기 전의 것) 제1호 (가)목.
   "2013-03-26": 3_980_000,
   // 구 국민연금 기준소득월액 하한액과 상한액(2015. 3. 27. 보건복지부고시 제2015-56호로 개정되기 전의 것) 제1호 (가)목.
@@ -185,7 +228,7 @@ const 국민연금_기준소득월액_상한액: Record<Date, number> = {
   "2022-03-31": 5_530_000,
 };
 
-const 종합소득세율: Record<Date, Progressive> = {
+const 종합소득세율: Record<개정일자["종합소득세율"], Progressive> = {
   // 구 소득세법(2016. 12. 20. 법률 제14389호로 개정되기 전의 것) 제55조 제1항.
   "2014-01-01": {
     0: { percent: 6, compensation: 0 },
@@ -237,20 +280,24 @@ const 종합소득세율: Record<Date, Progressive> = {
   },
 };
 
-const 근로소득세액공제율: Record<Date, Progressive> = {
-  // 구 소득세법(2015. 5. 13. 법률 제13282호로 개정되기 전의 것) 제59조 제1항.
-  "2014-01-01": {
-    0: { percent: 55, compensation: 0 },
-    500_001: { percent: 30, compensation: 125_000 },
-  },
-  // 소득세법 제59조 제1항.
-  "2015-05-13": {
-    0: { percent: 55, compensation: 0 },
-    1_300_001: { percent: 30, compensation: 325_000 },
-  },
-};
+const 근로소득세액공제율: Record<개정일자["근로소득세액공제율"], Progressive> =
+  {
+    // 구 소득세법(2015. 5. 13. 법률 제13282호로 개정되기 전의 것) 제59조 제1항.
+    "2014-01-01": {
+      0: { percent: 55, compensation: 0 },
+      500_001: { percent: 30, compensation: 125_000 },
+    },
+    // 소득세법 제59조 제1항.
+    "2015-05-13": {
+      0: { percent: 55, compensation: 0 },
+      1_300_001: { percent: 30, compensation: 325_000 },
+    },
+  };
 
-const 근로소득세액공제_한도: Record<Date, RangedFunction> = {
+const 근로소득세액공제_한도: Record<
+  개정일자["근로소득세액공제_한도"],
+  RangedFunction
+> = {
   // 구 소득세법(2015. 5. 13. 법률 제13282호로 개정되기 전의 것) 제59조 제2항.
   "2014-01-01": {
     0: (_) => 660_000,
@@ -280,7 +327,7 @@ const 근로소득세액공제_한도: Record<Date, RangedFunction> = {
 };
 
 export const articlesWithRevisions: {
-  [Key in keyof Articles]: Record<Date, Articles[Key]>;
+  [K in (typeof ArticleTypes)[number]]: Record<개정일자[K], Articles[K]>;
 } = {
   근로소득공제율,
   특별소득공제_및_특별세액공제_중_일부,
@@ -290,23 +337,25 @@ export const articlesWithRevisions: {
   근로소득세액공제_한도,
 };
 
-const 근로소득간이세액표_기준: Record<Date, Articles> = Object.fromEntries(
-  Object.entries(근로소득간이세액표_기준일자).map(([date, dates]) => [
-    date,
-    {
-      근로소득공제율: 근로소득공제율[dates.근로소득공제율],
-      특별소득공제_및_특별세액공제_중_일부:
-        특별소득공제_및_특별세액공제_중_일부[
-          dates.특별소득공제_및_특별세액공제_중_일부
-        ],
-      국민연금_기준소득월액_상한액:
-        국민연금_기준소득월액_상한액[dates.국민연금_기준소득월액_상한액],
-      종합소득세율: 종합소득세율[dates.종합소득세율],
-      근로소득세액공제율: 근로소득세액공제율[dates.근로소득세액공제율],
-      근로소득세액공제_한도: 근로소득세액공제_한도[dates.근로소득세액공제_한도],
-    },
-  ])
-);
+const 근로소득간이세액표_기준: Record<근로소득간이세액표_개정일자, Articles> =
+  Object.fromEntries(
+    Object.entries(근로소득간이세액표_기준일자).map(([revision, dates]) => [
+      revision,
+      {
+        근로소득공제율: 근로소득공제율[dates.근로소득공제율],
+        특별소득공제_및_특별세액공제_중_일부:
+          특별소득공제_및_특별세액공제_중_일부[
+            dates.특별소득공제_및_특별세액공제_중_일부
+          ],
+        국민연금_기준소득월액_상한액:
+          국민연금_기준소득월액_상한액[dates.국민연금_기준소득월액_상한액],
+        종합소득세율: 종합소득세율[dates.종합소득세율],
+        근로소득세액공제율: 근로소득세액공제율[dates.근로소득세액공제율],
+        근로소득세액공제_한도:
+          근로소득세액공제_한도[dates.근로소득세액공제_한도],
+      },
+    ])
+  ) as { [K in 근로소득간이세액표_개정일자]: Articles };
 
 const findAppliedRange = <T>(obj: Record<number, T>, value: number) => {
   const keys = Object.keys(obj).map((k) => parseInt(k));
@@ -336,7 +385,11 @@ const floor = (num: number, precision: number) => {
   return Math.floor(num * factor) / factor;
 };
 
-const calculate = (revision: string, monthly: number, family: number) => {
+const calculate = (
+  revision: 근로소득간이세액표_개정일자,
+  monthly: number,
+  family: number
+) => {
   const {
     근로소득공제율,
     특별소득공제_및_특별세액공제_중_일부,
@@ -382,7 +435,7 @@ const calculate = (revision: string, monthly: number, family: number) => {
 };
 
 const newRow = (
-  revision: string,
+  revision: 근로소득간이세액표_개정일자,
   minInclusive: number,
   interval: number
 ): RowType => {
@@ -397,11 +450,11 @@ const newRow = (
         i,
         calculate(revision, monthly, i).monthlyWithholdingTax,
       ])
-    ) as { [Key in (typeof dependentFamilyRange)[number]]: number }),
+    ) as { [K in (typeof dependentFamilyRange)[number]]: number }),
   };
 };
 
-export default function makeData(revision: string) {
+export default function makeData(revision: 근로소득간이세액표_개정일자) {
   return [
     ...range(146)
       .map((i) => 770 + i * 5)

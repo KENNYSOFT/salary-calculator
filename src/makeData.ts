@@ -342,8 +342,8 @@ export const articlesWithRevisions: Pick<
 
 const 근로소득간이세액표_기준: Record<근로소득간이세액표_개정일자, Articles> =
   ObjectFromEntries(
-    ObjectEntries(근로소득간이세액표_기준일자).map(([revision, dates]) => [
-      revision,
+    ObjectEntries(근로소득간이세액표_기준일자).map(([revisionDate, dates]) => [
+      revisionDate,
       {
         근로소득공제율: 근로소득공제율[dates.근로소득공제율],
         특별소득공제_및_특별세액공제_중_일부:
@@ -389,7 +389,7 @@ const floor = (num: number, precision: number) => {
 };
 
 const calculate = (
-  revision: 근로소득간이세액표_개정일자,
+  revisionDate: 근로소득간이세액표_개정일자,
   monthly: number,
   family: number
 ) => {
@@ -400,7 +400,7 @@ const calculate = (
     종합소득세율,
     근로소득세액공제율,
     근로소득세액공제_한도,
-  } = 근로소득간이세액표_기준[revision];
+  } = 근로소득간이세액표_기준[revisionDate];
   const total = monthly * 12;
   const taxBase =
     total -
@@ -438,7 +438,7 @@ const calculate = (
 };
 
 const newRow = (
-  revision: 근로소득간이세액표_개정일자,
+  revisionDate: 근로소득간이세액표_개정일자,
   minInclusive: number,
   interval: number
 ): RowType => {
@@ -447,27 +447,27 @@ const newRow = (
   return {
     minInclusive,
     maxExclusive,
-    ...calculate(revision, monthly, 1),
+    ...calculate(revisionDate, monthly, 1),
     ...ObjectFromEntries(
       dependentFamilyRange.map((i) => [
         i,
-        calculate(revision, monthly, i).monthlyWithholdingTax,
+        calculate(revisionDate, monthly, i).monthlyWithholdingTax,
       ])
     ),
   };
 };
 
-export default function makeData(revision: 근로소득간이세액표_개정일자) {
+export default function makeData(revisionDate: 근로소득간이세액표_개정일자) {
   return [
     ...range(146)
       .map((i) => 770 + i * 5)
-      .map((d) => newRow(revision, d, 5)),
+      .map((d) => newRow(revisionDate, d, 5)),
     ...range(150)
       .map((i) => 1500 + i * 10)
-      .map((d) => newRow(revision, d, 10)),
+      .map((d) => newRow(revisionDate, d, 10)),
     ...range(350)
       .map((i) => 3000 + i * 20)
-      .map((d) => newRow(revision, d, 20)),
-    newRow(revision, 10000, 0),
+      .map((d) => newRow(revisionDate, d, 20)),
+    newRow(revisionDate, 10000, 0),
   ];
 }

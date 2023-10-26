@@ -8,13 +8,13 @@ import { ObjectEntries, ObjectFromEntries } from "./util";
 describe("누진제", () => {
   test.each(
     ObjectEntries(articlesWithRevisions).flatMap(([articleName, revisions]) =>
-      ObjectEntries(revisions).map(([revision, ranges]) => ({
+      ObjectEntries(revisions).map(([revisionDate, ranges]) => ({
         articleName,
-        revision,
+        revisionDate,
         ranges,
       }))
     )
-  )("$articleName $revision", ({ ranges }) => {
+  )("$articleName $revisionDate", ({ ranges }) => {
     const rangeEntries = ObjectEntries(ranges);
     for (let i = 1; i < rangeEntries.length; i++) {
       const amount = rangeEntries[i][0] - 1;
@@ -31,7 +31,7 @@ describe("누진제", () => {
 
 describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결과 일치", () => {
   test.each`
-    revision        | headerRowCount
+    revisionDate    | headerRowCount
     ${"2014-02-21"} | ${5}
     ${"2015-06-30"} | ${3}
     ${"2017-02-03"} | ${3}
@@ -40,23 +40,23 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
     ${"2021-02-17"} | ${5}
     ${"2023-02-28"} | ${5}
   `(
-    "$revision",
+    "$revisionDate",
     ({
-      revision,
+      revisionDate,
       headerRowCount,
     }: {
-      revision: 근로소득간이세액표_개정일자;
+      revisionDate: 근로소득간이세액표_개정일자;
       headerRowCount: number;
     }) => {
       const workbook = readFile(
-        `./withholding-income-tax-table/${revision}-근로소득_간이세액표(조견표).xls${
-          revision === "2023-02-28" ? "x" : ""
+        `./withholding-income-tax-table/${revisionDate}-근로소득_간이세액표(조견표).xls${
+          revisionDate === "2023-02-28" ? "x" : ""
         }`
       );
       const expected = utils
         .sheet_to_json<(number | string)[]>(
           workbook.Sheets[
-            revision === "2014-02-21"
+            revisionDate === "2014-02-21"
               ? "2014.2월 간이세액표"
               : workbook.SheetNames[0]
           ],
@@ -79,7 +79,7 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
           };
         });
 
-      const actual = makeData(revision);
+      const actual = makeData(revisionDate);
 
       for (const [i, row] of actual.entries()) {
         expect(row, i.toString()).toMatchObject(expected[i]);

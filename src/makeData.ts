@@ -325,15 +325,19 @@ const 근로소득세액공제_한도: Record<
   },
 };
 
-export const articlesWithRevisions: {
-  [K in (typeof ArticleTypes)[number]]: Record<개정일자[K], Articles[K]>;
-} = {
+export const articlesWithRevisions: Pick<
+  {
+    [K in (typeof ArticleTypes)[number]]: Record<개정일자[K], Articles[K]>;
+  },
+  {
+    [K in (typeof ArticleTypes)[number]]: Articles[K] extends Progressive
+      ? K
+      : never;
+  }[(typeof ArticleTypes)[number]]
+> = {
   근로소득공제율,
-  특별소득공제_및_특별세액공제_중_일부,
-  국민연금_기준소득월액_상한액,
   종합소득세율,
   근로소득세액공제율,
-  근로소득세액공제_한도,
 };
 
 const 근로소득간이세액표_기준: Record<근로소득간이세액표_개정일자, Articles> =

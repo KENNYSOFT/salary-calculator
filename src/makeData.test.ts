@@ -1,22 +1,18 @@
 import { readFile, utils } from "xlsx";
 import makeData, {
   articlesWithRevisions,
-  ArticleTypes,
   근로소득간이세액표_개정일자,
 } from "./makeData";
 import { ObjectEntries, ObjectFromEntries } from "./util";
 
 describe("누진제", () => {
   test.each(
-    (
-      ["근로소득공제율", "종합소득세율", "근로소득세액공제율"] as Extract<
-        (typeof ArticleTypes)[number],
-        "근로소득공제율" | "종합소득세율" | "근로소득세액공제율"
-      >[]
-    ).flatMap((articleName) =>
-      ObjectEntries(articlesWithRevisions[articleName]).map(
-        ([revision, ranges]) => ({ articleName, revision, ranges })
-      )
+    ObjectEntries(articlesWithRevisions).flatMap(([articleName, revisions]) =>
+      ObjectEntries(revisions).map(([revision, ranges]) => ({
+        articleName,
+        revision,
+        ranges,
+      }))
     )
   )("$articleName $revision", ({ ranges }) => {
     const rangeEntries = ObjectEntries(ranges);

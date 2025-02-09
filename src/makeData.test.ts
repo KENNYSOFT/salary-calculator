@@ -39,6 +39,7 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
     ${"2020-02-11"} | ${5}
     ${"2021-02-17"} | ${5}
     ${"2023-02-28"} | ${5}
+    ${"2024-02-29"} | ${6}
   `(
     "$revisionDate",
     ({
@@ -50,7 +51,9 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
     }) => {
       const workbook = readFile(
         `./withholding-income-tax-table/${revisionDate}-근로소득_간이세액표(조견표).xls${
-          revisionDate === "2023-02-28" ? "x" : ""
+          revisionDate === "2023-02-28" || revisionDate === "2024-02-29"
+            ? "x"
+            : ""
         }`
       );
       const expected = utils

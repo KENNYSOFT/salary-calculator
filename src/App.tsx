@@ -119,7 +119,7 @@ function App() {
     }),
   ];
 
-  const [data, setData] = React.useState(() => makeData("2023-02-28"));
+  const [data, setData] = React.useState(() => makeData("2024-02-29"));
 
   return (
     <div>

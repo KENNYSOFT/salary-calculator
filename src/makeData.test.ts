@@ -40,6 +40,7 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
     ${"2021-02-17"} | ${5}
     ${"2023-02-28"} | ${5}
     ${"2024-02-29"} | ${6}
+    ${"2026-02-27"} | ${4}
   `(
     "$revisionDate",
     ({
@@ -50,8 +51,14 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
       headerRowCount: number;
     }) => {
       const workbook = readFile(
-        `./withholding-income-tax-table/${revisionDate}-근로소득_간이세액표(조견표).xls${
-          revisionDate === "2023-02-28" || revisionDate === "2024-02-29"
+        `./withholding-income-tax-table/${revisionDate}-${
+          revisionDate === "2026-02-27"
+            ? "근로소득 간이세액표"
+            : "근로소득_간이세액표(조견표)"
+        }.xls${
+          revisionDate === "2023-02-28" ||
+          revisionDate === "2024-02-29" ||
+          revisionDate === "2026-02-27"
             ? "x"
             : ""
         }`
@@ -61,6 +68,8 @@ describe("국세청 근로소득_간이세액표(조견표) 파일과 계산 결
           workbook.Sheets[
             revisionDate === "2014-02-21"
               ? "2014.2월 간이세액표"
+              : revisionDate === "2026-02-27"
+              ? "근로소득간이세액표"
               : workbook.SheetNames[0]
           ],
           { header: 1 }
